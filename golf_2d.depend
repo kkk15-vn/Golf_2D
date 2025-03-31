@@ -1,26 +1,32 @@
 # depslib dependency file v1.0
-1743117347 source:c:\c++ codeblocks\golf_2d\cpp file\main.cpp
-	<SDL.h>
-	<SDL_ttf.h>
-	<iostream>
-	<cmath>
-	<vector>
-	<string>
+1743395683 source:c:\c++ codeblocks\golf_2d\cpp file\main.cpp
+	"Game.h"
 
-1743126899 source:c:\c++ codeblocks\golf_2d\cpp file\ball.cpp
-	<SDL.h>
-	<SDL_ttf.h>
-	<iostream>
-	<cmath>
-	<vector>
+1743395683 source:c:\c++ codeblocks\golf_2d\cpp file\ball.cpp
+	"Ball.h"
 
 1743033441 source:c:\c++ codeblocks\golf_2d\cpp file\game.cpp
 	"game.h"
 
-1743033441 c:\c++ codeblocks\golf_2d\cpp file\game.h
+1743395683 c:\c++ codeblocks\golf_2d\cpp file\game.h
 	<SDL.h>
-	<SDL_ttf.h>
-	<iostream>
 	<vector>
-	<cmath>
+	"Ball.h"
+	"Obstacle.h"
+	"Menu.h"
+
+1743395683 source:c:\c++ codeblocks\golf_2d\cpp file\menu.cpp
+	"Menu.h"
+
+1743395683 c:\c++ codeblocks\golf_2d\cpp file\menu.h
+	<SDL.h>
+
+1743395683 source:c:\c++ codeblocks\golf_2d\cpp file\obstacle.cpp
+	"Obstacle.h"
+
+1743395683 c:\c++ codeblocks\golf_2d\cpp file\obstacle.h
+	<SDL.h>
+
+1743395693 c:\c++ codeblocks\golf_2d\cpp file\ball.h
+	<SDL.h>
 
