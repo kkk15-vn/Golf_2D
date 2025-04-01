@@ -1,7 +1,14 @@
-#include "Utils.h"
-#include <cmath>
+#include "Hole.h"
 
-void drawCircle(SDL_Renderer* renderer, int x, int y, int radius) {
+Hole::Hole(int x, int y, int radius) : x(x), y(y), radius(radius) {}
+
+void Hole::setPosition(int newX, int newY) {
+    x = newX;
+    y = newY;
+}
+
+void Hole::render(SDL_Renderer* renderer) {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Màu đen
     for (int w = 0; w < radius * 2; w++) {
         for (int h = 0; h < radius * 2; h++) {
             int dx = radius - w;
@@ -12,4 +19,3 @@ void drawCircle(SDL_Renderer* renderer, int x, int y, int radius) {
         }
     }
 }
-

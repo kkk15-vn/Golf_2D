@@ -1,32 +1,73 @@
 # depslib dependency file v1.0
-1743395683 source:c:\c++ codeblocks\golf_2d\cpp file\main.cpp
+1743467050 source:c:\c++ codeblocks\golf_2d\cpp file\main.cpp
 	"Game.h"
 
-1743395683 source:c:\c++ codeblocks\golf_2d\cpp file\ball.cpp
+1743498866 source:c:\c++ codeblocks\golf_2d\cpp file\ball.cpp
 	"Ball.h"
+	"Game.h"
+	<vector>
+	<cmath>
 
-1743033441 source:c:\c++ codeblocks\golf_2d\cpp file\game.cpp
-	"game.h"
+1743499547 source:c:\c++ codeblocks\golf_2d\cpp file\game.cpp
+	"Game.h"
+	<iostream>
 
-1743395683 c:\c++ codeblocks\golf_2d\cpp file\game.h
+1743499624 c:\c++ codeblocks\golf_2d\cpp file\game.h
+	<SDL.h>
+	<SDL_ttf.h>
+	"Ball.h"
+	"Hole.h"
+	"Obstacle.h"
+	<vector>
+
+1743463569 source:c:\c++ codeblocks\golf_2d\cpp file\menu.cpp
+	"Menu.h"
+	<iostream>
+
+1743463569 c:\c++ codeblocks\golf_2d\cpp file\menu.h
+	<SDL.h>
+	<SDL_ttf.h>
+	<string>
+
+1743498284 source:c:\c++ codeblocks\golf_2d\cpp file\obstacle.cpp
+	"Obstacle.h"
+	"Game.h"
+
+1743497735 c:\c++ codeblocks\golf_2d\cpp file\obstacle.h
+	<SDL.h>
+
+1743494638 c:\c++ codeblocks\golf_2d\cpp file\ball.h
 	<SDL.h>
 	<vector>
-	"Ball.h"
 	"Obstacle.h"
-	"Menu.h"
+	"Hole.h"
 
-1743395683 source:c:\c++ codeblocks\golf_2d\cpp file\menu.cpp
-	"Menu.h"
+1743398670 source:c:\c++ codeblocks\golf_2d\cpp file\utils.cpp
+	"Utils.h"
 
-1743395683 c:\c++ codeblocks\golf_2d\cpp file\menu.h
+1743398670 c:\c++ codeblocks\golf_2d\cpp file\utils.h
+	<SDL.h>
+	<cmath>
+
+1743393617 source:c:\c++ codeblocks\golf_2d\cpp file\sources.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	<SDL_image.h>
+	<SDL_mixer.h>
+	<iostream>
+	<cmath>
+	<vector>
+
+1743494074 c:\c++ codeblocks\golf_2d\cpp file\hole.h
 	<SDL.h>
 
-1743395683 source:c:\c++ codeblocks\golf_2d\cpp file\obstacle.cpp
-	"Obstacle.h"
+1743463569 c:\c++ codeblocks\golf_2d\cpp file\sound.h
+	<SDL_mixer.h>
 
-1743395683 c:\c++ codeblocks\golf_2d\cpp file\obstacle.h
-	<SDL.h>
+1743494074 source:c:\c++ codeblocks\golf_2d\cpp file\hole.cpp
+	"Hole.h"
 
-1743395693 c:\c++ codeblocks\golf_2d\cpp file\ball.h
-	<SDL.h>
+1743463569 source:c:\c++ codeblocks\golf_2d\cpp file\sound.cpp
+	"Sound.h"
+	<iostream>
 

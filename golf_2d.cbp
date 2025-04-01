@@ -31,7 +31,15 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="cpp file/ball.cpp" />
+		<Unit filename="cpp file/Ball.cpp" />
+		<Unit filename="cpp file/Ball.h" />
+		<Unit filename="cpp file/Game.cpp" />
+		<Unit filename="cpp file/Game.h" />
+		<Unit filename="cpp file/Hole.cpp" />
+		<Unit filename="cpp file/Hole.h" />
+		<Unit filename="cpp file/Obstacle.cpp" />
+		<Unit filename="cpp file/Obstacle.h" />
+		<Unit filename="cpp file/main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
