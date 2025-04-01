@@ -2,23 +2,27 @@
 1743467050 source:c:\c++ codeblocks\golf_2d\cpp file\main.cpp
 	"Game.h"
 
-1743498866 source:c:\c++ codeblocks\golf_2d\cpp file\ball.cpp
+1743504916 source:c:\c++ codeblocks\golf_2d\cpp file\ball.cpp
 	"Ball.h"
 	"Game.h"
 	<vector>
 	<cmath>
 
-1743499547 source:c:\c++ codeblocks\golf_2d\cpp file\game.cpp
+1743507805 source:c:\c++ codeblocks\golf_2d\cpp file\game.cpp
 	"Game.h"
+	"Ball.h"
 	<iostream>
 
-1743499624 c:\c++ codeblocks\golf_2d\cpp file\game.h
+1743507087 c:\c++ codeblocks\golf_2d\cpp file\game.h
 	<SDL.h>
 	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<SDL_image.h>
 	"Ball.h"
 	"Hole.h"
 	"Obstacle.h"
 	<vector>
+	<string>
 
 1743463569 source:c:\c++ codeblocks\golf_2d\cpp file\menu.cpp
 	"Menu.h"
@@ -36,7 +40,7 @@
 1743497735 c:\c++ codeblocks\golf_2d\cpp file\obstacle.h
 	<SDL.h>
 
-1743494638 c:\c++ codeblocks\golf_2d\cpp file\ball.h
+1743505463 c:\c++ codeblocks\golf_2d\cpp file\ball.h
 	<SDL.h>
 	<vector>
 	"Obstacle.h"

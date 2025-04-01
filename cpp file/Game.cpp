@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Ball.h"
 #include <iostream>
 
 Game::Game() : window(nullptr), renderer(nullptr), running(true),
@@ -13,6 +14,8 @@ Game::Game() : window(nullptr), renderer(nullptr), running(true),
     obstacles.push_back(Obstacle(200, 400, 150, 30, 1));
 }
 Game::~Game() {
+    Mix_FreeChunk(hitSound); // Giải phóng âm thanh
+    Mix_CloseAudio(); // Đóng SDL_mixer
     TTF_CloseFont(font); // Giải phóng font
     TTF_Quit(); // Đóng SDL_ttf
     SDL_DestroyRenderer(renderer);
@@ -40,6 +43,32 @@ bool Game::init() {
         return false;
     }
 
+    // Khởi tạo SDL_mixer
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        std::cerr << "SDL_mixer could not initialize! Error: " << Mix_GetError() << std::endl;
+        return false;
+    }
+
+    // Tải âm thanh từ file
+    hitSound = Mix_LoadWAV("Sounds/hit.wav");
+    if (!hitSound) {
+        std::cerr << "Failed to load hit sound: " << Mix_GetError() << std::endl;
+        return false;
+    }
+
+    // Tải hình nền menu
+    SDL_Surface* menuSurface = IMG_Load("Images/background.png");
+    if (!menuSurface) {
+        std::cerr << "Failed to load background image: " << IMG_GetError() << std::endl;
+        return false;
+    }
+    menuBackground = SDL_CreateTextureFromSurface(renderer, menuSurface);
+    SDL_FreeSurface(menuSurface); // Giải phóng surface sau khi tạo texture
+
+    // Thiết lập vị trí các nút menu
+    startButton = {300, 250, 200, 50};  // Vị trí & kích thước nút Start
+    introButton = {300, 320, 200, 50};  // Nút Introduction
+    exitButton = {300, 390, 200, 50};   // Nút Exit
 
     return window && renderer;
 }
@@ -47,8 +76,14 @@ bool Game::init() {
 void Game::run() {
     while (running) {
         processEvents();
-        update();
-        render();
+
+        if (inMenu) {
+            renderMenu(renderer); // Hiển thị menu nếu đang ở menu
+        } else {
+            update();
+            render();
+        }
+
         SDL_Delay(16);
     }
 }
@@ -59,16 +94,41 @@ void Game::processEvents() {
         if (event.type == SDL_QUIT) {
             running = false;
         }
-        if (event.type == SDL_MOUSEBUTTONDOWN) { // Nếu chuột được nhấp
-            mouseClickCount++;
 
-            if (mouseClickCount >= 2) { // Sau 2 lần nhấp, di chuyển lỗ golf
-                moveHole();
-                mouseClickCount = 0; // Đặt lại bộ đếm
+        if (inMenu && event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+            int mouseX = event.button.x;
+            int mouseY = event.button.y;
+
+            // Xử lý các nút trong menu
+            SDL_Point mousePoint = {mouseX, mouseY};
+            if (SDL_PointInRect(&mousePoint, &startButton)) {
+                inMenu = false; // Bắt đầu game
+            } else if (SDL_PointInRect(&mousePoint, &introButton)) {
+                std::cout << "Introduction Screen (Chưa cài đặt)" << std::endl;
+            } else if (SDL_PointInRect(&mousePoint, &exitButton)) {
+                running = false; // Thoát game
             }
         }
 
-        ball.handleEvent(event);
+        if (!inMenu) {
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                mouseClickCount++;
+            }
+
+            // Phát âm thanh khi chuột được nhả ra
+            if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) {
+                if (hitSound) {
+                    Mix_PlayChannel(-1, hitSound, 0); // Phát âm thanh đánh bóng
+                }
+
+                if (mouseClickCount >= 2) { // Sau 2 lần nhấp, di chuyển lỗ golf
+                    moveHole();
+                    mouseClickCount = 0;
+                }
+            }
+
+            ball.handleEvent(event);
+        }
     }
 }
 
@@ -106,6 +166,8 @@ void Game::moveHole() {
 // Cập nhật trạng thái game
 void Game::update() {
     ball.update(obstacles);
+    forceLevel = ball.getForceLevel(); // Lấy mức lực từ Ball
+
     for (auto& obstacle : obstacles) {
         obstacle.update(); // Cập nhật vị trí của vật thể
     }
@@ -141,7 +203,7 @@ void Game::render() {
     hole.render(renderer); // Vẽ hố golf
     ball.render(renderer); // Vẽ quả bóng
     ball.renderDragLine(renderer); // Vẽ tia kéo
-    ball.renderForceBar(renderer); // Vẽ thanh đo lực
+
     renderTime(renderer); // Gọi hàm hiển thị thời gian
 
     // Vẽ các chướng ngại vật
@@ -153,14 +215,53 @@ void Game::renderTime(SDL_Renderer* renderer) {
     if (remainingTime < 0) remainingTime = 0; // Tránh hiển thị giá trị âm
 
     SDL_Color textColor = {255, 255, 255, 255}; // Màu trắng
+
+    // Hiển thị thời gian còn lại
     std::string timeText = "Time Left: " + std::to_string(remainingTime) + "s";
+    SDL_Surface* surfaceTime = TTF_RenderText_Solid(font, timeText.c_str(), textColor);
+    SDL_Texture* textureTime = SDL_CreateTextureFromSurface(renderer, surfaceTime);
+    SDL_Rect timeRect = {10, 10, surfaceTime->w, surfaceTime->h};
+    SDL_RenderCopy(renderer, textureTime, nullptr, &timeRect);
+    SDL_FreeSurface(surfaceTime);
+    SDL_DestroyTexture(textureTime);
 
-    SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, timeText.c_str(), textColor);
-    SDL_Texture* message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+    // Hiển thị chữ "Power"
+    std::string powerText = "Power";
+    SDL_Surface* surfacePower = TTF_RenderText_Solid(font, powerText.c_str(), textColor);
+    SDL_Texture* texturePower = SDL_CreateTextureFromSurface(renderer, surfacePower);
+    SDL_Rect powerRect = {10, timeRect.y + timeRect.h + 5, surfacePower->w, surfacePower->h};
+    SDL_RenderCopy(renderer, texturePower, nullptr, &powerRect);
+    SDL_FreeSurface(surfacePower);
+    SDL_DestroyTexture(texturePower);
 
-    SDL_Rect messageRect = {10, 10, surfaceMessage->w, surfaceMessage->h};
-    SDL_RenderCopy(renderer, message, nullptr, &messageRect);
+    // Vẽ hình chữ nhật rỗng bên cạnh "Power"
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Màu trắng
+    SDL_Rect powerBar = {powerRect.x + powerRect.w + 10, powerRect.y, 100, powerRect.h}; // Hình chữ nhật rỗng
+    SDL_RenderDrawRect(renderer, &powerBar); // Vẽ viền hình chữ nhật
 
-    SDL_FreeSurface(surfaceMessage);
-    SDL_DestroyTexture(message);
+    // **Vẽ thanh đo lực bên trong hình chữ nhật rỗng**
+    int forceWidth = (forceLevel * powerBar.w) / 100; // Đảm bảo chiều dài thanh lực đạt tối đa 100%
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Màu đỏ
+    SDL_Rect forceBar = {powerBar.x + 2, powerBar.y + 2, forceWidth - 4, powerBar.h - 4}; // Thanh đo lực
+    SDL_RenderFillRect(renderer, &forceBar);
 }
+void Game::renderMenu(SDL_Renderer* renderer) {
+    SDL_RenderCopy(renderer, menuBackground, nullptr, nullptr); // Hiển thị nền
+
+    // Hiển thị chữ trên các nút
+    renderText("START", startButton.x + 50, startButton.y + 10);
+    renderText("INTRODUCTION", introButton.x + 0, introButton.y + 10);
+    renderText("EXIT", exitButton.x + 60, exitButton.y + 10);
+    SDL_RenderPresent(renderer);
+}
+
+void Game::renderText(const std::string& text, int x, int y) {
+    SDL_Color textColor = {255, 255, 255, 255}; // Màu trắng
+    SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), textColor);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect textRect = {x, y, surface->w, surface->h};
+    SDL_RenderCopy(renderer, texture, nullptr, &textRect);
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+}
+

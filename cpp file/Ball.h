@@ -17,12 +17,14 @@ public:
     bool checkCollision(const Obstacle& obstacle);
     bool checkHoleCollision(const Hole& hole);
     void setPosition(int newX, int newY);
+    int getForceLevel() const { return forceLevel; }
+
 private:
     int x, y, radius;
     int velocityX, velocityY;
     int startX, startY; // Vị trí chuột bắt đầu kéo
     int endX, endY; // Vị trí chuột khi thả
-    int forceLevel; // Lưu giá trị lực kéo
+    int forceLevel = 0; // Lưu giá trị lực kéo
     bool isDragging;
 
 };

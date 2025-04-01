@@ -130,12 +130,3 @@ void Ball::renderDragLine(SDL_Renderer* renderer) {
         SDL_RenderDrawLine(renderer, x, y, endX, endY); // Tia từ bóng đến vị trí chuột
     }
 }
-
-void Ball::renderForceBar(SDL_Renderer* renderer) {
-    if (isDragging) {
-        int barWidth = forceLevel; // Độ rộng tỷ lệ với lực kéo
-        SDL_Rect forceBar = {x - 50, y - radius - 20, barWidth, 10}; // Đặt vị trí gần bóng
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Màu đỏ
-        SDL_RenderFillRect(renderer, &forceBar);
-    }
-}
