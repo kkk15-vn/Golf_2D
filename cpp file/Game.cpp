@@ -68,7 +68,7 @@ bool Game::init() {
     // Thiết lập vị trí các nút menu
     startButton = {300, 250, 200, 50};  // Vị trí & kích thước nút Start
     introButton = {300, 320, 200, 50};  // Nút Introduction
-    exitButton = {300, 390, 200, 50};   // Nút Exit
+    exitButton  = {300, 390, 200, 50};   // Nút Exit
 
     return window && renderer;
 }
@@ -76,16 +76,16 @@ bool Game::init() {
 void Game::run() {
     while (running) {
         processEvents();
-
         if (inMenu) {
             renderMenu(renderer); // Hiển thị menu nếu đang ở menu
         } else {
             update();
             render();
         }
-
         SDL_Delay(16);
     }
+    std::cout << "Game Over! You ran out of time!" << std::endl;
+
 }
 
 void Game::processEvents() {
@@ -94,7 +94,10 @@ void Game::processEvents() {
         if (event.type == SDL_QUIT) {
             running = false;
         }
-
+        // Nếu trò chơi đã kết thúc, kiểm tra phím để chơi lại
+        if (isGameOver && event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_r) {
+            restartGame(); // Chơi lại khi nhấn "R"
+        }
         if (inMenu && event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
             int mouseX = event.button.x;
             int mouseY = event.button.y;
@@ -120,7 +123,6 @@ void Game::processEvents() {
                 if (hitSound) {
                     Mix_PlayChannel(-1, hitSound, 0); // Phát âm thanh đánh bóng
                 }
-
                 if (mouseClickCount >= 2) { // Sau 2 lần nhấp, di chuyển lỗ golf
                     moveHole();
                     mouseClickCount = 0;
@@ -139,12 +141,12 @@ void Game::loadNextLevel() {
     hole.setPosition(rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT); // Hố ở vị trí ngẫu nhiên
 
     // Cập nhật thời gian màn chơi
-    maxTime = std::max(10, maxTime - 2); // Giảm 2s mỗi màn, nhưng không dưới 10s
+    maxTime = std::max(10, maxTime - 5); // Giảm 2s mỗi màn, nhưng không dưới 10s
     startTime = SDL_GetTicks(); // Ghi lại thời điểm bắt đầu màn mới
 
     // Giữ nguyên vị trí chướng ngại vật, chỉ tăng tốc
     for (auto& obstacle : obstacles) {
-    obstacle.setSpeedX(obstacle.getSpeedX() * 1.05); // Tăng tốc 20% sau mỗi màn
+    obstacle.setSpeedX(obstacle.getSpeedX() * 4); // Tăng tốc sau mỗi màn
     }
 
     // Đảm bảo hố không xuất hiện quá gần biên
@@ -165,30 +167,41 @@ void Game::moveHole() {
 
 // Cập nhật trạng thái game
 void Game::update() {
+    if (inMenu || isGameOver) return; // Không cập nhật khi đang ở menu hoặc game đã kết thúc
+
     ball.update(obstacles);
-    forceLevel = ball.getForceLevel(); // Lấy mức lực từ Ball
+    forceLevel = ball.getForceLevel();
 
     for (auto& obstacle : obstacles) {
-        obstacle.update(); // Cập nhật vị trí của vật thể
+        obstacle.update();
     }
-    Uint32 currentTime = SDL_GetTicks();
-    remainingTime = maxTime - (currentTime - startTime) / 1000; // Tính thời gian còn lại
 
-    if (remainingTime <= 0) { // Nếu hết thời gian
+    Uint32 currentTime = SDL_GetTicks();
+    remainingTime = maxTime - (currentTime - startTime) / 1000;
+
+    // Nếu hết thời gian mà bóng chưa vào lỗ, kích hoạt màn hình "Game Over"
+    if (remainingTime <= 0 && !ball.checkHoleCollision(hole)) {
+        isGameOver = true; // Đánh dấu trạng thái kết thúc game
+        std::cout << "Game Over! Time ran out!" << std::endl;
+    }
+
+    // Nếu bóng vào lỗ trước khi hết thời gian, tiếp tục chơi
+    if (ball.checkHoleCollision(hole)) {
+        currentLevel++;
         loadNextLevel();
     }
-
-   // Kiểm tra xem bóng đã vào lỗ chưa
-    if (ball.checkHoleCollision(hole)) {
-        currentLevel++;  // Tăng màn chơi khi bóng vào lỗ
-        loadNextLevel(); // Gọi hàm tải màn mới
-    }
 }
-
 void Game::render() {
     // Vẽ nền xanh
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_RenderClear(renderer);
+
+    // Kiểm tra xem game đã kết thúc chưa
+    if (isGameOver) {
+        renderGameOver(renderer); // Hiển thị màn hình kết thúc
+        SDL_RenderPresent(renderer); // Cập nhật màn hình
+        return; // Ngừng vẽ các thành phần khác
+    }
 
     // Vẽ viền trắng
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -196,17 +209,16 @@ void Game::render() {
         SDL_Rect border = {i, i, SCREEN_WIDTH - 2 * i, SCREEN_HEIGHT - 2 * i};
         SDL_RenderDrawRect(renderer, &border);
     }
-    for (const auto& obstacle : obstacles) {
-        obstacle.render(renderer);
-    }
 
     hole.render(renderer); // Vẽ hố golf
     ball.render(renderer); // Vẽ quả bóng
     ball.renderDragLine(renderer); // Vẽ tia kéo
-
-    renderTime(renderer); // Gọi hàm hiển thị thời gian
+    renderTime(renderer); // Hiển thị thời gian
 
     // Vẽ các chướng ngại vật
+    for (const auto& obstacle : obstacles) {
+        obstacle.render(renderer);
+    }
 
     SDL_RenderPresent(renderer);
 }
@@ -265,3 +277,21 @@ void Game::renderText(const std::string& text, int x, int y) {
     SDL_DestroyTexture(texture);
 }
 
+void Game::renderGameOver(SDL_Renderer* renderer) {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Nền màu đen
+    SDL_RenderClear(renderer);
+
+    SDL_Color textColor = {255, 0, 0, 255}; // Màu đỏ
+    renderText("GAME OVER", SCREEN_WIDTH / 2 - 80, SCREEN_HEIGHT / 2 - 50);
+    renderText("Press R to Restart", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 + 30);
+
+    SDL_RenderPresent(renderer);
+}
+
+void Game::restartGame() {
+    isGameOver = false;  // Đặt lại trạng thái game
+    remainingTime = maxTime;  // Đặt lại thời gian
+    ball.setPosition(startX, startY);  // Đặt lại vị trí bóng
+    running = true;  // Tiếp tục vòng lặp game
+    startTime = SDL_GetTicks();  // Đặt lại thời gian bắt đầu game
+}

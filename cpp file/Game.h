@@ -29,14 +29,17 @@ private:
     SDL_Rect introButton;       // Nút Introduction
     SDL_Rect exitButton;        // Nút Exit
     bool inMenu = true;         // Trạng thái menu
-
+    bool isGameOver = false;
     bool running;
+    void restartGame();
     Ball ball;
     Hole hole;
     std::vector<Obstacle> obstacles;// Mảng 3 chướng ngại vật
     int currentLevel;
     int mouseClickCount = 0;
     int forceLevel = 0; // Lưu giá trị lực kéo
+    int startX = 100; // Vị trí ban đầu của bóng
+    int startY = 300;
     int remainingTime;
     int maxTime;
     Uint32 startTime;
@@ -51,6 +54,7 @@ private:
     void renderTime(SDL_Renderer* renderer);
     void renderMenu(SDL_Renderer* renderer);
     void renderText(const std::string& text, int x, int y);
+    void renderGameOver(SDL_Renderer* renderer);
 };
 
 #endif
